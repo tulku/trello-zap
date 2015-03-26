@@ -5,6 +5,7 @@ class TrelloZap(object):
 
     def __init__(self):
         backend = TrelloBackend()
+        backend.load_data()
 
 
 if __name__ == '__main__':
