@@ -1,0 +1,14 @@
+from trello_zap import TrelloBackend
+
+
+class TrelloZap(object):
+
+    def __init__(self):
+        backend = TrelloBackend()
+
+
+if __name__ == '__main__':
+    tz = TrelloZap()
+
+
+# vim: set ft=python:
