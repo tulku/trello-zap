@@ -4,7 +4,8 @@ time estimates from and to a specially crafted Trello board.
 """
 import os
 from trello import TrelloClient
-from raw_material import RawMaterial
+from raw_material import RawMaterial, RawMaterials
+from requests import Requests
 
 
 class TrelloBackend(object):
@@ -29,7 +30,9 @@ class TrelloBackend(object):
 
         raw_materials = self._get_raw_materials(raw_list)
         self._get_orders(orders_list, raw_materials)
-        return raw_materials
+
+        requests = self._get_requests(requests_list)
+        return RawMaterials(raw_materials), requests
 
     def _filter_by_name(self, items, name):
         for i in items:
@@ -80,3 +83,12 @@ class TrelloBackend(object):
             for m in raw_materials:
                 if m.name == card.name:
                     m.add_order(a, due)
+
+    def _get_requests(self, requests_list):
+        r = Requests()
+        for card in requests_list.list_cards():
+            card.fetch()
+            a = self._parse_order_card_description(card)
+            r.append(card.name, a)
+
+        return r

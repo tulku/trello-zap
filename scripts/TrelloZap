@@ -5,9 +5,10 @@ class TrelloZap(object):
 
     def __init__(self):
         backend = TrelloBackend()
-        raw_materials = backend.load_data()
-        for material in raw_materials:
-            print material.create_timeline()
+        raw_materials, requests = backend.load_data()
+        raw_materials.create_timeline()
+        print raw_materials.max_sim_date
+        print requests
 
 
 if __name__ == '__main__':

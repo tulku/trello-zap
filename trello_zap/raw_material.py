@@ -43,3 +43,17 @@ class RawMaterial(object):
 
     def __repr__(self):
         return "Name: {}, Orders: {}".format(self.name, self.orders)
+
+
+class RawMaterials(object):
+
+    def __init__(self, raw_materials):
+        self.raw_materials = raw_materials
+        self.max_sim_date = None
+
+    def create_timeline(self):
+        dates = []
+        for material in self.raw_materials:
+            dates.append(material.create_timeline())
+
+        self.max_sim_date = max(dates)
