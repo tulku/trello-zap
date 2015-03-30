@@ -27,7 +27,9 @@ class TrelloBackend(object):
         orders_list = self._get_list(board, self._orders_list)
         requests_list = self._get_list(board, self._requests_list)
 
-        print self._get_raw_materials(raw_list)
+        raw_materials = self._get_raw_materials(raw_list)
+        self._get_orders(orders_list, raw_materials)
+        return raw_materials
 
     def _filter_by_name(self, items, name):
         for i in items:
@@ -39,9 +41,17 @@ class TrelloBackend(object):
         desc = card.description
         lt_mark = 'Lead Time: '
         s_mark = 'Stock: '
+        n_mark = 'Needed: '
         lt = int(desc.split(lt_mark)[1].split(' ')[0])
-        sc = int(desc.split(s_mark)[1])
-        return lt, sc
+        sc = int(desc.split(s_mark)[1].split('\n')[0])
+        n = int(desc.split(n_mark)[1].split('\n')[0])
+        return lt, sc, n
+
+    def _parse_order_card_description(self, card):
+        desc = card.description
+        a_mark = 'Amount: '
+        a = int(desc.split(a_mark)[1])
+        return a
 
     def _get_production_board(self):
         boards = self._trello.list_boards()
@@ -54,7 +64,19 @@ class TrelloBackend(object):
     def _get_raw_materials(self, raw_list):
         raw_materials = []
         for card in raw_list.list_cards():
-            lt, sc = self._parse_card_description(card)
-            due = card.due
-            raw_materials.append(RawMaterial.create(card.name, lt, sc, due))
+            card.fetch()
+            lt, sc, n = self._parse_card_description(card)
+            raw_materials.append(RawMaterial.create(card.name, lt, sc, n))
         return raw_materials
+
+    def _get_orders(self, orders_list, raw_materials):
+        for card in orders_list.list_cards():
+            card.fetch()
+            a = self._parse_order_card_description(card)
+            try:
+                due = card.due
+            except AttributeError:
+                due = None
+            for m in raw_materials:
+                if m.name == card.name:
+                    m.add_order(a, due)
