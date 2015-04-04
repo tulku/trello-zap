@@ -5,36 +5,49 @@ from trello_zap import TestBackend
 from trello_zap import Engine
 
 import sys
+import time
+import traceback
 
 
 class TrelloZap(object):
 
     def __init__(self, offline):
-        test = TestBackend()
-        if offline is True:
-            raw_materials, requests = test.load_data()
+        self.test = TestBackend()
+        self.offline = offline
+        if offline is False:
+            self.backend = TrelloBackend()
+
+    def compute(self):
+        if self.offline is True:
+            raw_materials, requests = self.test.load_data()
         else:
-            backend = TrelloBackend()
-            raw_materials, requests = backend.load_data()
-            test.save_data(raw_materials, requests)
+            raw_materials, requests = self.backend.load_data()
+            self.test.save_data(raw_materials, requests)
 
         raw_materials.create_timeline()
         engine = Engine(raw_materials, requests)
 
         engine.calculate()
         orders = raw_materials.get_required_orders()
-        if offline is True:
-            test.inform_required_orders(orders)
-            test.update_requests(requests)
+        if self.offline is True:
+            self.test.inform_required_orders(orders)
+            self.test.update_requests(requests)
         else:
-            backend.inform_required_orders(orders)
-            backend.update_requests(requests)
+            self.backend.inform_required_orders(orders)
+            self.backend.update_requests(requests)
 
 if __name__ == '__main__':
     offline = False
     if len(sys.argv) == 2 and sys.argv[1] == '--offline':
         offline = True
     tz = TrelloZap(offline)
+    while(True):
+        try:
+            tz.compute()
+        except:
+            traceback.print_exc()
+            print "I've catched an exception!"
+        time.sleep(1)
 
 
 # vim: set ft=python:
