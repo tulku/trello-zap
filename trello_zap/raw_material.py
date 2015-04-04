@@ -3,6 +3,7 @@ Super simple representation of a raw material (or part)
 of the thing we are producing.
 """
 import arrow
+import os
 
 
 class RawMaterial(object):
@@ -67,6 +68,7 @@ class RawMaterial(object):
 class RawMaterials(object):
 
     def __init__(self):
+        self.order_time = os.environ['ORDER_DAYS']
         self.raw_materials = []
         self.required_orders = None
         self.max_sim_date = None
@@ -90,10 +92,18 @@ class RawMaterials(object):
     def create_orders(self, amounts):
         self.required_orders = []
         for name, amount in amounts.iteritems():
-            rm = RawMaterial()
-            rm.to_order = amount
-            rm.name = name
-            self.required_orders.append(rm)
+            for mat in self.raw_materials:
+                if name == mat.name:
+                    self._clone_to_order(mat, amount)
+
+    def _clone_to_order(self, mat, amount):
+        now = arrow.now()
+        o = RawMaterial()
+        o.set(mat.name, mat.lead_time, mat.needed, mat.backend_object)
+        o.to_order = amount
+        shift = int(o.lead_time) + int(self.order_time)
+        o.order_due = now.replace(days=+shift)
+        self.required_orders.append(o)
 
     def get_required_materials(self, pieces):
         required = {}
@@ -101,6 +111,9 @@ class RawMaterials(object):
             n = m.get_required_amount(pieces)
             required[m.name] = n
         return required
+
+    def get_required_orders(self):
+        return self.required_orders
 
     def use(self, required):
         dates = []

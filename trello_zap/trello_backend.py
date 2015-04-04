@@ -20,19 +20,56 @@ class TrelloBackend(object):
         self._raw_materials_list = os.environ['TRELLO_RAW_LIST']
         self._orders_list = os.environ['TRELLO_ORDERS_LIST']
         self._requests_list = os.environ['TRELLO_REQUESTS_LIST']
+        self._to_order_list = os.environ['TRELLO_TO_ORDER_LIST']
 
     def load_data(self):
         """ Reads all needed information from the backend. """
         board = self._get_production_board()
-        raw_list = self._get_list(board, self._raw_materials_list)
-        orders_list = self._get_list(board, self._orders_list)
-        requests_list = self._get_list(board, self._requests_list)
+        self.lists = board.all_lists()
+
+        raw_list = self._get_list(self._raw_materials_list)
+        orders_list = self._get_list(self._orders_list)
+        requests_list = self._get_list(self._requests_list)
 
         raw_materials = self._get_raw_materials(raw_list)
         self._get_orders(orders_list, raw_materials)
 
         requests = self._get_requests(requests_list)
         return raw_materials, requests
+
+    def inform_required_orders(self, required_orders):
+        """
+        Shows to the user the orders that he needs to produce. The orders have
+        the required amount in the description and an estimated due date based
+        on the lead_time and the time it takes for the users to place the
+        order.
+        """
+        to_order_list = self._get_list(self._to_order_list)
+        for card in to_order_list.list_cards():
+            card.delete()
+        if required_orders is None:
+            return
+
+        for order in required_orders:
+            order_desc = 'Amount: {}\n'.format(order.to_order)
+            card = to_order_list.add_card(order.name, order_desc)
+            card.set_due(order.order_due)
+
+    def update_requests(self, requests):
+        """
+        Updates the requests cards on trello with the due date or marked as
+        impossible with current stock.
+        """
+        for request in requests.get_requests():
+            if request.impossible:
+                request.backend_object.set_labels("red")
+                request.backend_object.set_due(None)
+                print 'Request {} is impossible.'.format(request.name)
+            else:
+                request.backend_object.set_due(request.due)
+                request.backend_object.set_labels("")
+                print 'Request {} due to {}.'.format(request.name, request.due)
+        pass
 
     def _filter_by_name(self, items, name):
         for i in items:
@@ -60,9 +97,8 @@ class TrelloBackend(object):
         boards = self._trello.list_boards()
         return self._filter_by_name(boards, self._board_name)
 
-    def _get_list(self, board, list_name):
-        lists = board.all_lists()
-        return self._filter_by_name(lists, list_name)
+    def _get_list(self, list_name):
+        return self._filter_by_name(self.lists, list_name)
 
     def _get_raw_materials(self, raw_list):
         raw_materials = RawMaterials()

@@ -22,6 +22,13 @@ class TrelloZap(object):
         engine = Engine(raw_materials, requests)
 
         engine.calculate()
+        orders = raw_materials.get_required_orders()
+        if offline is True:
+            test.inform_required_orders(orders)
+            test.update_requests(requests)
+        else:
+            backend.inform_required_orders(orders)
+            backend.update_requests(requests)
 
 if __name__ == '__main__':
     offline = False

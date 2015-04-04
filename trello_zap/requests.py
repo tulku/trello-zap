@@ -17,11 +17,9 @@ class Request(object):
 
     def mark_impossible(self):
         self.impossible = True
-        print 'Request {} for {} impossible'.format(self.amount, self.name)
 
     def set_due(self, due):
         self.due = due
-        print 'Request {} for {} due {}'.format(self.amount, self.name, due)
 
     def __str__(self):
         return " Resquest for {} of {}".format(self.name, self.amount)
