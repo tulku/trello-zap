@@ -7,25 +7,19 @@ import arrow
 
 class RawMaterial(object):
 
-    @staticmethod
-    def create(name, lead_time, stock, needed):
-        r = RawMaterial()
-        r.set(name, lead_time, stock, needed)
-        return r
-
     def __init__(self):
+        self.backend_object = None
         self.available_by = None
         self.name = None
         self.lead_time = None
-        self.stock = None
         self.needed = None
         self.to_order = None
         self.orders = {}
 
-    def set(self, name, lead_time, stock, needed):
+    def set(self, name, lead_time, needed, obj):
+        self.backend_object = obj
         self.name = name
         self.lead_time = lead_time
-        self.stock = stock
         self.needed = needed
 
     def add_order(self, amount, due):
@@ -33,11 +27,11 @@ class RawMaterial(object):
         self.orders[due_date] = amount
 
     def create_timeline(self):
+        dates = sorted(self.orders)
         self.available_by = {}
-        self.available_by[arrow.now()] = self.stock
-        total = self.stock
-        for date, amount in self.orders.iteritems():
-            total += amount
+        total = 0
+        for date in dates:
+            total += self.orders[date]
             self.available_by[date] = total
 
         return max(self.available_by.keys())
@@ -72,10 +66,20 @@ class RawMaterial(object):
 
 class RawMaterials(object):
 
-    def __init__(self, raw_materials):
-        self.raw_materials = raw_materials
+    def __init__(self):
+        self.raw_materials = []
         self.required_orders = None
         self.max_sim_date = None
+
+    def append(self, name, lead_time, needed, stock, date, obj):
+        rm = RawMaterial()
+        rm.set(name, lead_time, needed, obj)
+        rm.add_order(stock, date)
+        self.raw_materials.append(rm)
+
+    def get_materials(self):
+        for rm in self.raw_materials:
+            yield rm
 
     def create_timeline(self):
         dates = []
