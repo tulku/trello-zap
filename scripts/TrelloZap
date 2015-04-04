@@ -1,18 +1,33 @@
+#!/usr/bin/env python
+
 from trello_zap import TrelloBackend
+from trello_zap import TestBackend
+from trello_zap import Engine
+
+import sys
 
 
 class TrelloZap(object):
 
-    def __init__(self):
-        backend = TrelloBackend()
-        raw_materials, requests = backend.load_data()
-        raw_materials.create_timeline()
-        print raw_materials.max_sim_date
-        print requests
+    def __init__(self, offline):
+        test = TestBackend()
+        if offline is True:
+            raw_materials, requests = test.load_data()
+        else:
+            backend = TrelloBackend()
+            raw_materials, requests = backend.load_data()
+            test.save_data(raw_materials, requests)
 
+        raw_materials.create_timeline()
+        engine = Engine(raw_materials, requests)
+
+        engine.calculate()
 
 if __name__ == '__main__':
-    tz = TrelloZap()
+    offline = False
+    if len(sys.argv) == 2 and sys.argv[1] == '--offline':
+        offline = True
+    tz = TrelloZap(offline)
 
 
 # vim: set ft=python:
