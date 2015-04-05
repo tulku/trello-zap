@@ -79,9 +79,10 @@ class TrelloBackend(object):
 
     def _parse_card_description(self, card):
         desc = card.description
-        lt_mark = 'Lead Time: '
-        s_mark = 'Stock: '
-        n_mark = 'Needed: '
+        desc = desc.lower()
+        lt_mark = 'lead time: '
+        s_mark = 'stock: '
+        n_mark = 'needed: '
         lt = int(desc.split(lt_mark)[1].split(' ')[0])
         sc = int(desc.split(s_mark)[1].split('\n')[0])
         n = int(desc.split(n_mark)[1].split('\n')[0])
@@ -89,7 +90,8 @@ class TrelloBackend(object):
 
     def _parse_order_card_description(self, card):
         desc = card.description
-        a_mark = 'Amount: '
+        desc = desc.lower()
+        a_mark = 'amount: '
         a = int(desc.split(a_mark)[1])
         return a
 
