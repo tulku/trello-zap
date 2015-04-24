@@ -85,7 +85,7 @@ class TrelloBackend(object):
         n_mark = 'needed: '
         lt = int(desc.split(lt_mark)[1].split(' ')[0])
         sc = int(desc.split(s_mark)[1].split('\n')[0])
-        n = int(desc.split(n_mark)[1].split('\n')[0])
+        n = float(desc.split(n_mark)[1].split('\n')[0])
         return lt, sc, n
 
     def _parse_order_card_description(self, card):
