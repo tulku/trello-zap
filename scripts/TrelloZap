@@ -8,6 +8,12 @@ import sys
 import time
 import traceback
 
+try:
+    import urllib3.contrib.pyopenssl
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+except:
+    print "urllib3 not found, probably not needed"
+
 
 class TrelloZap(object):
 
@@ -41,13 +47,11 @@ if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == '--offline':
         offline = True
     tz = TrelloZap(offline)
-    while(True):
-        try:
-            tz.compute()
-        except:
-            traceback.print_exc()
-            print "I've catched an exception!"
-        time.sleep(1)
+    try:
+        tz.compute()
+    except:
+        traceback.print_exc()
+        print "I've catched an exception!"
 
 
 # vim: set ft=python:
