@@ -92,7 +92,7 @@ class TrelloBackend(object):
         desc = card.description
         desc = desc.lower()
         a_mark = 'amount: '
-        a = int(desc.split(a_mark)[1])
+        a = int(desc.split(a_mark)[1].split('\n')[0])
         return a
 
     def _get_production_board(self):
