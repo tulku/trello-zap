@@ -3,6 +3,7 @@ Gets the production information and outputs the
 time estimates from and to a specially crafted Trello board.
 """
 import os
+from config import Configuration
 from trello import TrelloClient
 from raw_material import RawMaterials
 from requests import Requests
@@ -16,11 +17,12 @@ class TrelloBackend(object):
                                     token=os.environ['OAUTH_TOKEN'],
                                     token_secret=os.environ['OAUTH_SECRET'])
 
-        self._board_name = os.environ['TRELLO_BOARD']
-        self._raw_materials_list = os.environ['TRELLO_RAW_LIST']
-        self._orders_list = os.environ['TRELLO_ORDERS_LIST']
-        self._requests_list = os.environ['TRELLO_REQUESTS_LIST']
-        self._to_order_list = os.environ['TRELLO_TO_ORDER_LIST']
+        config = Configuration()
+        self._board_name = config.get_board_name()
+        self._raw_materials_list = config.get_list('raw')
+        self._orders_list = config.get_list('orders')
+        self._requests_list = config.get_list('requests')
+        self._to_order_list = config.get_list('to_order')
 
     def load_data(self):
         """ Reads all needed information from the backend. """

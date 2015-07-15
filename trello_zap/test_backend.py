@@ -2,14 +2,14 @@
 Implements a testing backend. This should allow simpler unittesting
 and faster development (no need to download trello information)
 """
-import os
+from config import Configuration
 import cPickle as pickle
 
 
 class TestBackend(object):
 
     def __init__(self):
-        self.filename = os.environ['OFFLINE_FILE']
+        self.filename = Configuration().get_offlinefile()
 
     def load_data(self):
         data = open(self.filename, 'rb')

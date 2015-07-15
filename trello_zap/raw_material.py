@@ -3,7 +3,7 @@ Super simple representation of a raw material (or part)
 of the thing we are producing.
 """
 import arrow
-import os
+from config import Configuration
 
 
 class RawMaterial(object):
@@ -68,7 +68,8 @@ class RawMaterial(object):
 class RawMaterials(object):
 
     def __init__(self):
-        self.order_time = os.environ['ORDER_DAYS']
+        conf = Configuration()
+        self.order_time = conf.get_time('ordering')
         self.raw_materials = []
         self.required_orders = None
         self.max_sim_date = None

@@ -9,7 +9,7 @@ Implements the planning code:
        second one?
     ...
 """
-import os
+from config import Configuration
 
 
 class Engine(object):
@@ -17,7 +17,8 @@ class Engine(object):
     def __init__(self, materials, requests):
         self.materials = materials
         self.requests = requests
-        self.fab_days = int(os.environ['FAB_DAYS'])
+        conf = Configuration()
+        self.fab_days = conf.get_time('fabrication')
 
     def calculate(self):
         needed = self.requests.get_total()
