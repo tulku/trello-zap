@@ -12,7 +12,7 @@ try:
     import urllib3.contrib.pyopenssl
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 except:
-    print "urllib3 not found, probably not needed"
+    print("urllib3 not found, probably not needed")
 
 
 class TrelloZap(object):
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         tz.compute()
     except:
         traceback.print_exc()
-        print "I've catched an exception!"
+        print("I've catched an exception!")
 
 
 # vim: set ft=python:

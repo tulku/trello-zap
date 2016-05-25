@@ -2,8 +2,8 @@
 Implements a testing backend. This should allow simpler unittesting
 and faster development (no need to download trello information)
 """
-from config import Configuration
-import cPickle as pickle
+from .config import Configuration
+import pickle
 
 
 class TestBackend(object):
@@ -24,15 +24,15 @@ class TestBackend(object):
     def inform_required_orders(self, orders):
         if orders is not None:
             for o in orders:
-                print 'Need to order {} {}. Due {}'.format(o.to_order,
+                print('Need to order {} {}. Due {}'.format(o.to_order,
                                                            o.name,
-                                                           o.order_due)
+                                                           o.order_due))
         else:
-            print 'There are no new orders required.'
+            print('There are no new orders required.')
 
     def update_requests(self, requests):
         for request in requests.get_requests():
             if request.impossible:
-                print 'Request {} is impossible.'.format(request.name)
+                print('Request {} is impossible.'.format(request.name))
             else:
-                print 'Request {} due to {}.'.format(request.name, request.due)
+                print('Request {} due to {}.'.format(request.name, request.due))

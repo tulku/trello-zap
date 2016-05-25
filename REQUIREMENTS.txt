@@ -1,2 +1,2 @@
-py-trello
-arrow
+py-trello==0.5.0
+arrow==0.7.0

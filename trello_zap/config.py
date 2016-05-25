@@ -1,17 +1,20 @@
-import ConfigParser
+import configparser
 import os
 
 
 class Configuration(object):
 
     def __init__(self, conf_file=None):
-        self.config = ConfigParser.ConfigParser()
+        self.config = configparser.ConfigParser()
         if conf_file is None:
             conf_file = os.environ['TRELLO_ZAP_CONFIG']
         self.config.readfp(open(conf_file))
 
     def get_board_name(self):
         return self.config.get('Board', 'board_name')
+
+    def get_impossible_label(self):
+        return self.config.get('Board', 'impossible_label')
 
     def get_list(self, name):
         return self.config.get('Lists', name)

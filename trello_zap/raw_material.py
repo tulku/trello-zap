@@ -3,7 +3,7 @@ Super simple representation of a raw material (or part)
 of the thing we are producing.
 """
 import arrow
-from config import Configuration
+from .config import Configuration
 
 
 class RawMaterial(object):
@@ -51,7 +51,7 @@ class RawMaterial(object):
                 break
         else:
             # never found enough materials
-            print '{}, not enough material for {}'.format(self.name, amount)
+            print('{}, not enough material for {}'.format(self.name, amount))
 
         available_date = date
         # discount amount from all dates
@@ -92,7 +92,7 @@ class RawMaterials(object):
 
     def create_orders(self, amounts):
         self.required_orders = []
-        for name, amount in amounts.iteritems():
+        for name, amount in amounts.items():
             for mat in self.raw_materials:
                 if name == mat.name:
                     self._clone_to_order(mat, amount)
@@ -118,7 +118,7 @@ class RawMaterials(object):
 
     def use(self, required):
         dates = []
-        for material, amount in required.iteritems():
+        for material, amount in required.items():
             for mat in self.raw_materials:
                 if material == mat.name:
                     dates.append(mat.use(amount))

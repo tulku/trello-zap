@@ -9,7 +9,7 @@ Implements the planning code:
        second one?
     ...
 """
-from config import Configuration
+from .config import Configuration
 
 
 class Engine(object):

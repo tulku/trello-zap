@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-setup(name='trello-zap',
+setup(name='trello_zap',
       version='0.1',
       packages=['trello_zap'],
       scripts=['scripts/TrelloZap'],

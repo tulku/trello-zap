@@ -3,13 +3,14 @@ Gets the production information and outputs the
 time estimates from and to a specially crafted Trello board.
 """
 import os
-from config import Configuration
-from trello import TrelloClient
-from raw_material import RawMaterials
-from requests import Requests
+from trello import TrelloClient, Label
+from trello.exceptions import ResourceUnavailable
+from .config import Configuration
+from .raw_material import RawMaterials
+from .requests import Requests
 
 
-class TrelloBackend(object):
+class TrelloBackend():
 
     def __init__(self):
         self._trello = TrelloClient(api_key=os.environ['TRELLO_API_KEY'],
@@ -23,12 +24,14 @@ class TrelloBackend(object):
         self._orders_list = config.get_list('orders')
         self._requests_list = config.get_list('requests')
         self._to_order_list = config.get_list('to_order')
+        self._label_name = config.get_impossible_label()
 
     def load_data(self):
         """ Reads all needed information from the backend. """
         board = self._get_production_board()
         self.lists = board.all_lists()
-
+        self._impossible_label = self._get_impossible_label(board)
+        print(self._impossible_label)
         raw_list = self._get_list(self._raw_materials_list)
         orders_list = self._get_list(self._orders_list)
         requests_list = self._get_list(self._requests_list)
@@ -54,7 +57,7 @@ class TrelloBackend(object):
 
         for order in required_orders:
             order_desc = 'Amount: {}\n'.format(order.to_order)
-            card = to_order_list.add_card(order.name, order_desc)
+            card = to_order_list.add_card(str(order.name, 'UTF-8'), order_desc)
             card.set_due(order.order_due)
 
     def update_requests(self, requests):
@@ -64,18 +67,25 @@ class TrelloBackend(object):
         """
         for request in requests.get_requests():
             if request.impossible:
-                request.backend_object.set_labels("red")
-                request.backend_object.set_due(None)
-                print 'Request {} is impossible.'.format(request.name)
+                try:
+                    request.backend_object.add_label(self._impossible_label)
+                    request.backend_object.set_due('due', '')
+                except ResourceUnavailable:
+                    pass
+                print('Request {} is impossible.'.format(request.name))
             else:
                 request.backend_object.set_due(request.due)
-                request.backend_object.set_labels("")
-                print 'Request {} due to {}.'.format(request.name, request.due)
+                request.backend_object.remove_label(self._impossible_label)
+                print('Request {} due to {}.'.format(request.name, request.due))
         pass
 
     def _filter_by_name(self, items, name):
         for i in items:
-            if i.name == name:
+            try:
+                n = str(i.name, 'UTF-8')
+            except TypeError:
+                n = i.name
+            if n == name:
                 i.fetch()
                 return i
 
@@ -94,8 +104,16 @@ class TrelloBackend(object):
         desc = card.description
         desc = desc.lower()
         a_mark = 'amount: '
-        a = int(desc.split(a_mark)[1].split('\n')[0])
+        amount_text = desc.split(a_mark)[1].split('\n')[0]
+        try:
+            a = int(amount_text)
+        except ValueError:
+            a = float(amount_text)
         return a
+
+    def _get_impossible_label(self, board):
+        labels = board.get_labels()
+        return self._filter_by_name(labels, self._label_name)
 
     def _get_production_board(self):
         boards = self._trello.list_boards()
